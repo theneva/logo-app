@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="manifest" href="/manifest.json">
+    <title>Document</title>
+</head>
+<body>
+Hello
+<p id="output"></p>
+<script>
+console.log('checking');
+
+var output = document.getElementById('output');
+
+var worker;
+
+if ('serviceWorker' in navigator) {
+  console.log('serviceWorker in navigator');
+  window.addEventListener('load', () => {
+    output.textContent = 'Inside load';
+    navigator.serviceWorker.register('/sw.js').then(function(registration) {
+      output.textContent = 'Registration done'
+      // Registration was successful
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      console.log({ registration });
+
+      navigator.serviceWorker.ready.then(() => {
+        navigator.serviceWorker.addEventListener('message', message => {
+          output.textContent = message.data;
+        });
+
+        navigator.serviceWorker.controller.postMessage('hi from main');
+      });
+    }, function(err) {
+      // registration failed :(
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
+
+var deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent Chrome 67 and earlier from automatically showing the prompt
+  e.preventDefault();
+
+  // Stash the event so it can be triggered later.
+  deferredPrompt = e;
+
+  console.log('hello from beforeinstallprompt');
+});
+</script>
+</body>
+</html>
